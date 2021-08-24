@@ -1,0 +1,84 @@
+
+version: "3.5"
+services:
+
+  
+
+  nats-1:
+    image: nats
+    command: "--cluster nats://0.0.0.0:6222 --cluster_name nats-t16s "
+    ports:
+      - "8222:8222"
+      - "6222:6222"
+    
+  nats-2:
+    image: nats
+    command: "--cluster nats://0.0.0.0:6222 --cluster_name nats-t16s --routes=nats://ruser:T0pS3cr3t@nats:6222"
+    networks: ["nats"]
+    depends_on: ["nats-1"]
+
+  nats-3:
+    image: nats
+    command: "--cluster nats://0.0.0.0:6222 --cluster_name nats-t16s --routes=nats://ruser:T0pS3cr3t@nats:6222"
+    networks: ["nats"]
+    depends_on: ["nats-2"]
+
+  nats-queue-worker-service-1:
+    image: nats-queue-worker-service:0.0.1-SNAPSHOT
+    environment:
+      - "nats.servers=nats-1:4222, nats-2:4222, nats-3:4222"
+      #- "nats.servers=nats-1:4222"
+      - "server.port=8100"
+      - "queue.worker.name=QW-1"
+    #ports: 
+    #  - "8080:8080"
+    networks: ["nats"]
+    depends_on: ["nats-3"]
+    
+ ## nats-queue-worker-service-2:
+ ##   image: nats-queue-worker-service:0.0.1-SNAPSHOT
+ ##   environment:
+ ##     - "nats.servers=nats-1:4222, nats-2:4222, nats-3:4222"
+ ##     - "server.port=8101"
+ ##     - "queue.worker.name=QW-2"
+ ##   #ports: 
+ ##   #  - "8080:8080"
+ ##   networks: ["nats"]
+ ##   depends_on: ["nats-1"]
+    
+ ## nats-queue-worker-service-3:
+ ##   image: nats-queue-worker-service:0.0.1-SNAPSHOT
+ ##   environment:
+ ##     - "nats.servers=nats-1:4222, nats-2:4222, nats-3:4222"
+ ##     - "server.port=8102"
+ ##     - "queue.worker.name=QW-3"
+ ##   #ports: 
+ ##   #  - "8080:8080"
+ ##   networks: ["nats"]
+ ##   depends_on: ["nats-1"]
+    
+  nats-processor-service:
+    image: nats-processor-service:0.0.1-SNAPSHOT
+    environment:
+      - "nats.servers=nats-1:4222, nats-2:4222, nats-3:4222"
+     # - "nats.servers=nats-1:4222"
+      - "server.port=8090"
+    #ports: 
+    #  - "8080:8080"
+    networks: ["nats"]
+    depends_on: ["nats-3"]
+
+  nats-rest-service:
+    image: nats-rest-service:0.0.1-SNAPSHOT
+    environment:
+      - "nats.servers=nats-1:4222, nats-2:4222, nats-3:4222"
+      #- "nats.servers=nats-1:4222"
+    ports: 
+      - "8080:8080"
+    networks: ["nats"]
+    depends_on: ["nats-3"]
+    
+    
+networks:
+  nats:
+    name: nats
