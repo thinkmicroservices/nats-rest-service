@@ -29,13 +29,6 @@
             <artifactId>spring-native</artifactId>
             <version>${spring-native.version}</version>
         </dependency>
-
-        <!-- <dependency>
-    <groupId>io.nats</groupId>
-    <artifactId>nats-spring-boot-starter</artifactId>
-    <version>0.4.0</version>
-</dependency>
-        -->
         <dependency>
             <groupId>io.nats</groupId>
             <artifactId>jnats</artifactId>
